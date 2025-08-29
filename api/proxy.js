@@ -1,25 +1,27 @@
 export default async function handler(req, res) {
   const { phone } = req.query;
 
-  // keep your API key safe here (server-side only!)
-  const API_KEY = "Pkcka4f2BbdHh2FhzJtx";
+  const API_KEY = "Pkcka4f2BbdHh2FhzJtx"; // 🔑 your key
 
   try {
-    const response = await fetch(
-      `https://api.blacklistalliance.net/lookup?key=${API_KEY}&ver=v3&resp=json&phone=${phone}`,
-      {
-        method: "GET",
-        headers: { "Accept": "application/json" },
-      }
-    );
+    const url = `https://api.blacklistalliance.net/lookup?key=${API_KEY}&ver=v3&resp=json&phone=${phone}`;
+    console.log("➡️ Fetching:", url);
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { "Accept": "application/json" },
+    });
+
+    const text = await response.text(); // get raw response
+    console.log("⬅️ Raw response:", text);
 
     if (!response.ok) {
       return res
         .status(response.status)
-        .json({ error: `Upstream error: ${response.status}` });
+        .json({ error: `Upstream error: ${response.status}`, details: text });
     }
 
-    const data = await response.json();
+    const data = JSON.parse(text);
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ error: "Proxy server error", details: err.message });
